@@ -45,7 +45,8 @@ export default class RibbonMenu {
       categoryEl.classList.add("ribbon__item_active");
     });
 
-    ribbonList.addEventListener("click", ({ target }) => {
+    ribbonList.addEventListener("click", (event) => {
+      const { target } = event;
       const ce = new CustomEvent("ribbon-select", {
         detail: target.dataset.id,
         bubbles: true,
