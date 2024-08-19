@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Бангкок Экспресс: Модальное окно</title>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Бангкок Экспресс: Модальное окно</title>
+    <link rel="stylesheet" href="./index.css" />
+    <link rel="stylesheet" href="/assets/styles/common.css" />
+  </head>
 
-  <link rel="stylesheet" href="./index.css" />
-  <link rel="stylesheet" href="/assets/styles/common.css" />
-</head>
+  <body>
+    <script type="module">
+      import Modal from "./index.js";
+      import createElement from "../../assets/lib/create-element.js";
 
-<body>
-  <script type="module">
-    import Modal from './index.js';
-    import createElement from '../../assets/lib/create-element.js';
+      window.openModal = () => {
+        let modal = new Modal();
 
-    window.openModal = () => {
-      let modal = new Modal();
-      modal.setTitle('Modal Title');
-      modal.setBody(createElement('<div>Тело модального окна</div>'));
+        modal.setTitle("Modal Title");
+        modal.setBody(
+          createElement(
+            "<div>Тело модального окна, которое можно закрыть с помощью крестика в верхнем правом углу, либо с помощью клавишы Esc, в верхнем левом углу клавиатуры. Также внутри класса Model есть метод close() с помощью которого также можно закрыть модальное окно.</div>"
+          )
+        );
 
-      modal.open();
-    }
-  </script>
+        modal.open();
 
-  <div class="container">
-    <button class='button' onclick="openModal()" style="background: white; color: black;padding: 10px">
-      Нажми меня, чтобы открыть модальное окно
-    </button>
-  </div>
+        modal.setTitle("New Modal Title");
+      };
+    </script>
 
-
-</body>
-
+    <div class="container">
+      <button
+        class="button"
+        onclick="openModal()"
+        style="background: white; color: black; padding: 10px"
+      >
+        Нажми меня, чтобы открыть модальное окно
+      </button>
+    </div>
+  </body>
 </html>
