@@ -10,7 +10,6 @@ function initCarousel() {
   buttonRightEl.addEventListener("click", function () {
     widthOfEl += -carouselEl.offsetWidth;
     carouselEl.style.transform = `translateX(${widthOfEl}px)`;
-    console.log(widthOfEl);
     if (widthOfEl == -(carouselEl.offsetWidth * 3)) {
       buttonRightEl.style.display = "none";
     } else {
@@ -22,7 +21,6 @@ function initCarousel() {
   buttonLeftEl.addEventListener("click", function () {
     widthOfEl += carouselEl.offsetWidth;
     carouselEl.style.transform = `translateX(${widthOfEl}px)`;
-    console.log(widthOfEl);
     if (widthOfEl == 0) {
       buttonLeftEl.style.display = "none";
     } else {
