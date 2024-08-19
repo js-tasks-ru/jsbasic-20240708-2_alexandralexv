@@ -25,16 +25,14 @@ export default class StepSlider {
 
         <!--Шаги слайдера-->
         <div class="slider__steps">
-          ${"<span></span>".repeat(
-            this.steps
-          )} <!-- Динамическое создание шагов -->
+          ${"<span></span>".repeat(this.steps)}
         </div>
       </div>
     `);
 
     this.elem
       .querySelector(".slider__steps")
-      .children[0].classList.add("slider__step-active"); // Первый шаг активный
+      .children[0].classList.add("slider__step-active");
   }
 
   ClickOnSlider() {
@@ -62,7 +60,7 @@ export default class StepSlider {
 
     thumb.addEventListener("pointerdown", (event) => {
       event.preventDefault();
-      this.elem.classList.add("slider_dragging"); // Добавляем класс при перетаскивании
+      this.elem.classList.add("slider_dragging");
 
       const onPointerMove = (event) => {
         let left = event.clientX - this.elem.getBoundingClientRect().left;
@@ -83,7 +81,7 @@ export default class StepSlider {
       };
 
       const onPointerUp = () => {
-        this.elem.classList.remove("slider_dragging"); // Убираем класс после завершения перетаскивания
+        this.elem.classList.remove("slider_dragging");
         document.removeEventListener("pointermove", onPointerMove);
         document.removeEventListener("pointerup", onPointerUp);
       };

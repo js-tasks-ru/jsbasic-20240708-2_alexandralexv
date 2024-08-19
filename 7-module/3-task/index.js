@@ -2,6 +2,7 @@ import createElement from "../../assets/lib/create-element.js";
 
 export default class StepSlider {
   constructor({ steps, value = 0 }) {
+    this.steps = steps; // Сохраняем количество шагов
     this.createSlider();
     this.segments = steps - 1;
     this.setValue(value);
@@ -23,14 +24,17 @@ export default class StepSlider {
 
         <!--Шаги слайдера-->
         <div class="slider__steps">
-          <span></span>
-          <span></span>
-          <span class="slider__step-active"></span>
-          <span></span>
-          <span></span>
+          ${"<span></span>".repeat(
+            this.steps
+          )} <!-- Динамическая отрисовка шагов -->
         </div>
       </div>
     `);
+
+    // Активируем первый шаг
+    this.elem
+      .querySelector(".slider__steps")
+      .children[0].classList.add("slider__step-active");
   }
 
   ClickOnSlider() {
@@ -41,7 +45,7 @@ export default class StepSlider {
       let left = event.clientX - this.elem.getBoundingClientRect().left;
       // рассчитаем относительное значение, взяв за основу ширину слайдера
       let leftRelative = left / this.elem.offsetWidth;
-      // возьмем полученное значение  и умножим его на количество сегментов
+      // возьмем полученное значение и умножим его на количество сегментов
       let approximateValue = leftRelative * this.segments;
       // округлим
       let value = Math.round(approximateValue);
