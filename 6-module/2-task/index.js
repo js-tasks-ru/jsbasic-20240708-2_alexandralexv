@@ -29,9 +29,7 @@ export default class ProductCard {
   addToBascet(card) {
     let button = card.querySelector(".card__button");
 
-    button.addEventListener("product-add", (ev) => {
-      console.log(ev.detail);
-    });
+    button.addEventListener("product-add", (ev) => {});
 
     button.addEventListener("click", () => {
       if (button) {

@@ -53,11 +53,10 @@ export default class Carousel {
     }
   }
   addToBascet(carousel) {
-    console.log("addToBascet()");
     const carouselList = carousel.querySelector(".carousel__inner");
 
     carouselList.addEventListener("product-add", (event) => {
-      console.log("Блюдо добавлено в корзину:", event.detail);
+      let dish = event.detail;
     });
 
     carouselList.addEventListener("click", ({ target }) => {
