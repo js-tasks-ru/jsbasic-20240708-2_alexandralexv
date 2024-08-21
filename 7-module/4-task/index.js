@@ -36,8 +36,6 @@ export default class StepSlider {
   }
 
   ClickOnSlider() {
-    this.elem.addEventListener("slider-change", () => {});
-
     this.elem.addEventListener("click", (event) => {
       let left = event.clientX - this.elem.getBoundingClientRect().left;
       let leftRelative = left / this.elem.offsetWidth;
@@ -61,35 +59,64 @@ export default class StepSlider {
     thumb.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       this.elem.classList.add("slider_dragging");
-
-      const onPointerMove = (event) => {
-        let left = event.clientX - this.elem.getBoundingClientRect().left;
-        let leftRelative = Math.max(
-          0,
-          Math.min(left / this.elem.offsetWidth, 1)
-        );
-        let value = Math.round(leftRelative * this.segments);
-
-        this.setValue(value);
-
-        this.elem.dispatchEvent(
-          new CustomEvent("slider-change", {
-            detail: value,
-            bubbles: true,
-          })
-        );
-      };
-
-      const onPointerUp = () => {
-        this.elem.classList.remove("slider_dragging");
-        document.removeEventListener("pointermove", onPointerMove);
-        document.removeEventListener("pointerup", onPointerUp);
-      };
-
-      document.addEventListener("pointermove", onPointerMove);
-      document.addEventListener("pointerup", onPointerUp);
+      document.addEventListener("pointermove", this.onPointerMove);
+      document.addEventListener("pointerup", this.onPointerUp);
     });
   }
+
+  onPointerMove = (event) => {
+    event.preventDefault();
+
+    let newLeft =
+      (event.clientX - this.elem.getBoundingClientRect().left) /
+      this.elem.offsetWidth;
+
+    if (newLeft < 0) {
+      newLeft = 0;
+    }
+    if (newLeft > 1) {
+      newLeft = 1;
+    }
+
+    this.elem.querySelector(".slider__thumb").style.left = `${newLeft * 100}%`;
+    this.elem.querySelector(".slider__progress").style.width = `${
+      newLeft * 100
+    }%`;
+
+    this.value = Math.round(this.segments * newLeft);
+    this.elem.querySelector(".slider__value").innerHTML = this.value;
+
+    if (this.elem.querySelector(".slider__step-active")) {
+      this.elem
+        .querySelector(".slider__step-active")
+        .classList.remove("slider__step-active");
+    }
+
+    this.elem
+      .querySelector(".slider__steps")
+      .children[this.value].classList.add("slider__step-active");
+  };
+
+  onPointerUp = () => {
+    document.removeEventListener("pointermove", this.onPointerMove);
+    document.removeEventListener("pointerup", this.onPointerUp);
+
+    this.elem.classList.remove("slider_dragging");
+
+    this.elem.querySelector(".slider__thumb").style.left = `${
+      (this.value / this.segments) * 100
+    }%`;
+    this.elem.querySelector(".slider__progress").style.width = `${
+      (this.value / this.segments) * 100
+    }%`;
+
+    this.elem.dispatchEvent(
+      new CustomEvent("slider-change", {
+        detail: this.value,
+        bubbles: true,
+      })
+    );
+  };
 
   setValue(value) {
     const percentage = (value / this.segments) * 100;
