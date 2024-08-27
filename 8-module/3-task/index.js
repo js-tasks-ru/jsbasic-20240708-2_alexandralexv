@@ -13,6 +13,7 @@ export default class Cart {
     let findProduct = this.cartItems.find(
       (item) => item.product.id === product.id
     );
+
     if (!findProduct) {
       this.cartItems.push({ product, count: 1 });
     } else {

@@ -25,6 +25,7 @@ export default class Cart {
     } else {
       findProduct.count++;
     }
+    console.log(this.cartItems);
 
     this.onProductUpdate(this.cartItems);
   }
