@@ -32,6 +32,12 @@ export default class Modal {
 
   close() {
     if (this.modalElement) {
+      const event = new CustomEvent("modal-close", {
+        bubbles: true,
+      });
+
+      this.modalElement.dispatchEvent(event);
+
       this.modalElement.remove();
       document.body.classList.remove("is-modal-open");
       this.modalElement = null;
