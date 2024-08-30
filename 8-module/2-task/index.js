@@ -7,20 +7,13 @@ export default class ProductGrid extends ProductCard {
     this.products = products;
     this.filters = {};
     this.elem = this.createGrid(products);
-    this.obj = {
-      noNuts: false,
-      vegeterianOnly: false,
-      maxSpiciness: 4,
-      category: "",
-    };
+    this.renderContent(); // Добавил
   }
   createGrid(products) {
     const grid = createElement(`
       <div class="products-grid">
         <div class="products-grid__inner">
-          ${products
-            .map((product) => new ProductCard(product).elem.outerHTML)
-            .join("")}
+          
         </div>
       </div>
     `);
@@ -28,37 +21,36 @@ export default class ProductGrid extends ProductCard {
     return grid;
   }
 
+  renderContent() {
+    this.elem.querySelector(".products-grid__inner").innerHTML = "";
+
+    for (let product of this.products) {
+      if (this.filters.noNuts && product.nuts) {
+        continue;
+      }
+
+      if (this.filters.vegeterianOnly && !product.vegeterian) {
+        continue;
+      }
+
+      if (
+        this.filters.maxSpiciness !== undefined &&
+        product.spiciness > this.filters.maxSpiciness
+      ) {
+        continue;
+      }
+
+      if (this.filters.category && product.category != this.filters.category) {
+        continue;
+      }
+
+      let card = new ProductCard(product);
+      this.elem.querySelector(".products-grid__inner").append(card.elem);
+    }
+  }
+
   updateFilter(filters) {
-    Object.assign(this.obj, filters);
-
-    // console.log(this.obj);
-    // console.log(product);
-
-    let filteredProducts = this.products.slice();
-    // console.log(filteredProducts);
-
-    filteredProducts = filteredProducts.filter((item) => {
-      if (this.obj.category && item.category !== this.obj.category) {
-        return false;
-      }
-      if (item.spiciness && item.spiciness > this.obj.maxSpiciness) {
-        return false;
-      }
-      if (this.obj.noNuts && item.nuts) {
-        return false;
-      }
-      if (this.obj.vegeterianOnly && !item.vegeterian) {
-        return false;
-      }
-      return true;
-    });
-
-    const containerEl = document.querySelector("#container");
-    containerEl.innerHTML = "";
-
-    this.elem = this.createGrid(filteredProducts);
-    containerEl.append(this.elem);
-
-    // console.log(filteredProducts);
+    Object.assign(this.filters, filters);
+    this.renderContent();
   }
 }

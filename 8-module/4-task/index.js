@@ -13,57 +13,42 @@ export default class Cart {
   }
 
   addProduct(product) {
-    if (!product) {
-      return;
-    }
-
-    let findProduct = this.cartItems.find(
-      (item) => item.product.id === product.id
-    );
-    if (!findProduct) {
-      this.cartItems.push({ product, count: 1 });
+    let cartItem = this.cartItems.find((item) => item.product.id == product.id);
+    if (!cartItem) {
+      cartItem = {
+        product,
+        count: 1,
+      };
+      this.cartItems.push(cartItem);
     } else {
-      findProduct.count++;
+      cartItem.count++;
     }
 
-    this.onProductUpdate(this.cartItems);
+    this.onProductUpdate(cartItem);
   }
 
   updateProductCount(productId, amount) {
-    if (!this.cartItems.length) {
-      return;
+    let cartItem = this.cartItems.find((item) => item.product.id == productId);
+    cartItem.count += amount;
+
+    if (cartItem.count == 0) {
+      this.cartItems.splice(this.cartItems.indexOf(cartItem), 1);
     }
 
-    let product = this.cartItems.find((item) => item.product.id === productId);
-
-    if (product.count > 0) {
-      product.count += amount;
-    }
-
-    if (product.count === 0) {
-      this.cartItems = this.cartItems.filter(
-        (item) => item.product.id !== productId
-      );
-    }
-
-    this.onProductUpdate(this.cartItems);
+    this.onProductUpdate(cartItem);
   }
 
   isEmpty() {
-    return !this.cartItems.length;
+    return this.cartItems.length === 0;
   }
 
   getTotalCount() {
-    return this.cartItems.reduce(
-      (totalAmountProduct, item) => (totalAmountProduct += item.count),
-      0
-    );
+    return this.cartItems.reduce((sum, item) => sum + item.count, 0);
   }
 
   getTotalPrice() {
     return this.cartItems.reduce(
-      (totalPriceProduct, item) =>
-        (totalPriceProduct += item.product.price * item.count),
+      (sum, item) => sum + item.product.price * item.count,
       0
     );
   }
@@ -120,127 +105,102 @@ export default class Cart {
   renderModal() {
     this.modal = new Modal();
 
-    this.modal.setTitle("YOUR ORDER");
+    this.modal.setTitle("Your order");
 
-    const basket = document.querySelector(".cart-icon");
-    const divEl = document.createElement("DIV");
+    this.modalBody = document.createElement(`div`);
 
-    for (const i in this.cartItems) {
-      divEl.append(
-        this.renderProduct(this.cartItems[i].product, this.cartItems[i].count)
-      );
+    for (let { product, count } of this.cartItems) {
+      this.modalBody.append(this.renderProduct(product, count));
     }
 
-    divEl.addEventListener("click", (e) => {
-      const productId = e.target.closest(".cart-product");
+    this.modalBody.append(this.renderOrderForm());
 
-      if (e.target.closest(".cart-counter__button_plus")) {
-        this.updateProductCount(productId.getAttribute("data-product-id"), 1);
-      } else if (e.target.closest(".cart-counter__button_minus")) {
-        this.updateProductCount(productId.getAttribute("data-product-id"), -1);
-      }
+    this.modalBody.addEventListener("click", this.onModalBodyClick);
 
-      basket.classList.remove("cart-icon_visible");
+    this.modalBody.querySelector("form").onsubmit = (event) =>
+      this.onSubmit(event);
+
+    this.modal.setBody(this.modalBody);
+
+    // when modal is closed, we forget about it, don't update it any more
+    this.modal.elem.addEventListener("modal-close", () => {
+      this.modal = null;
+      this.modalBody = null;
     });
 
-    divEl.append(this.renderOrderForm());
-
-    this.modal.setBody(divEl);
     this.modal.open();
-
-    const cartForm = document.querySelector(".cart-form");
-
-    cartForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      this.onSubmit(e.target);
-    });
-
-    this.modal.modalElement.addEventListener("modal-close", () => {
-      if (!this.isEmpty()) {
-        basket.classList.add("cart-icon_visible");
-      }
-    });
-    this.onProductUpdate(this.cartItems);
-    basket.classList.remove("cart-icon_visible");
   }
 
-  onProductUpdate(cartItem) {
+  onModalBodyClick = (event) => {
+    if (event.target.closest(".cart-counter__button")) {
+      let productElem = event.target.closest("[data-product-id]");
+      let productId = productElem.dataset.productId;
+      this.updateProductCount(
+        productId,
+        event.target.closest(".cart-counter__button_plus") ? 1 : -1
+      );
+    }
+  };
+
+  onProductUpdate({ product, count }) {
     this.cartIcon.update(this);
 
-    if (!document.body.classList.contains("is-modal-open")) {
+    if (!this.modal || !document.body.classList.contains("is-modal-open")) {
       return;
     }
 
-    const modalBody = document.querySelector(".modal__body");
-
-    for (const item of cartItem) {
-      const productId = item.product.id;
-      const productCard = modalBody.querySelector(
-        `[data-product-id="${productId}"]`
-      );
-      const productCount = modalBody.querySelector(
-        `[data-product-id="${productId}"] .cart-counter__count`
-      );
-      const productPrice = productCard.querySelector(`.cart-product__price`);
-
-      if (productCount && productPrice) {
-        if (item.count > 0) {
-          productCount.innerHTML = item.count;
-          productPrice.innerHTML = `€${(
-            item.product.price * item.count
-          ).toFixed(2)}`;
-        } else {
-          productCard.remove();
-        }
-      }
-    }
-
-    const infoPrice = modalBody.querySelector(`.cart-buttons__info-price`);
-    if (infoPrice) {
-      infoPrice.innerHTML = `€${this.getTotalPrice().toFixed(2)}`;
-    }
-
-    if (this.isEmpty()) {
+    if (this.cartItems.length == 0) {
+      // No products, close the modal
       this.modal.close();
+      return;
     }
+
+    if (count == 0) {
+      this.modalBody
+        .querySelector(`[data-product-id="${product.id}"]`)
+        .remove();
+    } else {
+      this.modalBody.querySelector(
+        `[data-product-id="${product.id}"] .cart-counter__count`
+      ).innerHTML = count;
+
+      this.modalBody.querySelector(
+        `[data-product-id="${product.id}"] .cart-product__price`
+      ).innerHTML = "€" + (count * product.price).toFixed(2);
+    }
+
+    this.modalBody.querySelector(`.cart-buttons__info-price`).innerHTML =
+      "€" + this.getTotalPrice().toFixed(2);
   }
 
-  async onSubmit(form) {
-    const submitButton = form.querySelector('button[type="submit"]');
-    submitButton.classList.add("is-loading");
+  async onSubmit(event) {
+    event.preventDefault();
 
-    const formData = new FormData(form);
+    this.modalBody
+      .querySelector('button[type="submit"]')
+      .classList.add("is-loading");
+    let form = this.modalBody.querySelector(".cart-form");
+    let userData = new FormData(form);
 
-    try {
-      const response = await fetch("https://httpbin.org/post", {
-        method: "POST",
-        body: formData,
-      });
+    await fetch("https://httpbin.org/post", { method: "POST", body: userData });
 
-      if (response.ok) {
-        this.cartItems = [];
-        this.cartIcon.update(this);
-        this.modal.setTitle("Success!");
-        this.modal.setBody(
-          createElement(`
-            <div class="modal__body-inner">
-              <p>
-                Order successful! Your order is being cooked :) <br>
-                We’ll notify you about delivery time shortly.<br>
-                <img src="/assets/images/delivery.gif">
-              </p>
-            </div>
-          `)
-        );
-      } else {
-        console.error("Failed:", response.status);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      // В любом случае убираем класс "is-loading" с кнопки
-      submitButton.classList.remove("is-loading");
-    }
+    this.modal.setTitle("Success!");
+    this.modalBody
+      .querySelector('button[type="submit"]')
+      .classList.remove("is-loading");
+
+    this.cartItems = [];
+    this.cartIcon.update(this);
+
+    this.modalBody.innerHTML = `
+      <div class="modal__body-inner">
+        <p>
+          Order successful! Your order is being cooked :) <br>
+          We’ll notify you about delivery time shortly.<br>
+          <img src="/assets/images/delivery.gif">
+        </p>
+      </div>
+      `;
   }
 
   addEventListeners() {
