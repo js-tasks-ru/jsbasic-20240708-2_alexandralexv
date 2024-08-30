@@ -1,7 +1,7 @@
-import createElement from '../../assets/lib/create-element.js';
-import escapeHtml from '../../assets/lib/escape-html.js';
+import createElement from "../../assets/lib/create-element.js";
+import escapeHtml from "../../assets/lib/escape-html.js";
 
-import Modal from '../../7-module/2-task/index.js';
+import Modal from "../../7-module/2-task/index.js";
 
 export default class Cart {
   cartItems = []; // [product: {...}, count: N]
@@ -30,7 +30,7 @@ export default class Cart {
   }
 
   updateProductCount(productId, amount) {
-    let cartItem = this.cartItems.find(item => item.product.id == productId);
+    let cartItem = this.cartItems.find((item) => item.product.id == productId);
     cartItem.count += amount;
 
     if (cartItem.count == 0) {
@@ -57,9 +57,7 @@ export default class Cart {
 
   renderProduct(product, count) {
     return createElement(`
-    <div class="cart-product" data-product-id="${
-      product.id
-    }">
+    <div class="cart-product" data-product-id="${product.id}">
       <div class="cart-product__img">
         <img src="/assets/images/products/${product.image}" alt="product">
       </div>
@@ -121,7 +119,8 @@ export default class Cart {
 
     this.modalBody.addEventListener("click", this.onModalBodyClick);
 
-    this.modalBody.querySelector("form").onsubmit = (event) => this.onSubmit(event);
+    this.modalBody.querySelector("form").onsubmit = (event) =>
+      this.onSubmit(event);
 
     this.modal.setBody(this.modalBody);
 
@@ -145,10 +144,10 @@ export default class Cart {
     }
   };
 
-  onProductUpdate({product, count}) {
+  onProductUpdate({ product, count }) {
     this.cartIcon.update(this);
 
-    if (!this.modal || !document.body.classList.contains('is-modal-open')) {
+    if (!this.modal || !document.body.classList.contains("is-modal-open")) {
       return;
     }
 
@@ -159,14 +158,21 @@ export default class Cart {
     }
 
     if (count == 0) {
-      this.modalBody.querySelector(`[data-product-id="${product.id}"]`).remove();
+      this.modalBody
+        .querySelector(`[data-product-id="${product.id}"]`)
+        .remove();
     } else {
-      this.modalBody.querySelector(`[data-product-id="${product.id}"] .cart-counter__count`).innerHTML = count;
+      this.modalBody.querySelector(
+        `[data-product-id="${product.id}"] .cart-counter__count`
+      ).innerHTML = count;
 
-      this.modalBody.querySelector(`[data-product-id="${product.id}"] .cart-product__price`).innerHTML = '€' + (count * product.price).toFixed(2);
+      this.modalBody.querySelector(
+        `[data-product-id="${product.id}"] .cart-product__price`
+      ).innerHTML = "€" + (count * product.price).toFixed(2);
     }
 
-    this.modalBody.querySelector(`.cart-buttons__info-price`).innerHTML = '€' + this.getTotalPrice().toFixed(2);
+    this.modalBody.querySelector(`.cart-buttons__info-price`).innerHTML =
+      "€" + this.getTotalPrice().toFixed(2);
   }
 
   async onSubmit(event) {
@@ -175,10 +181,10 @@ export default class Cart {
     this.modalBody
       .querySelector('button[type="submit"]')
       .classList.add("is-loading");
-    let form = this.modalBody.querySelector('.cart-form');
+    let form = this.modalBody.querySelector(".cart-form");
     let userData = new FormData(form);
 
-    await fetch('https://httpbin.org/post', { method: 'POST', body: userData });
+    await fetch("https://httpbin.org/post", { method: "POST", body: userData });
 
     this.modal.setTitle("Success!");
     this.modalBody

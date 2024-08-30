@@ -2,7 +2,13 @@ import createElement from "../../assets/lib/create-element.js";
 
 export default class Modal {
   constructor() {
-    this.modalElement = createElement(`
+    this.render();
+
+    this.elem.addEventListener("click", (event) => this.onClick(event));
+  }
+
+  render() {
+    this.elem = createElement(`
       <div class="modal">
         <div class="modal__overlay"></div>
         <div class="modal__inner">
@@ -16,45 +22,50 @@ export default class Modal {
         </div>
       </div>
     `);
-    this.esc = this.esc.bind(this);
+  }
+
+  sub(ref) {
+    return this.elem.querySelector(`.modal__${ref}`);
   }
 
   open() {
-    document.body.append(this.modalElement);
+    document.body.append(this.elem);
     document.body.classList.add("is-modal-open");
 
-    this.modalElement
-      .querySelector(".modal__close")
-      .addEventListener("click", () => this.close());
+    this._keydownEventListener = (event) => this.onDocumentKeyDown(event);
+    document.addEventListener("keydown", this._keydownEventListener);
 
-    document.addEventListener("keydown", this.esc);
+    if (this.elem.querySelector("[autofocus]")) {
+      this.elem.querySelector("[autofocus]").focus();
+    }
   }
 
-  close() {
-    if (this.modalElement) {
-      this.modalElement.remove();
-      document.body.classList.remove("is-modal-open");
-      this.modalElement = null;
+  onClick(event) {
+    if (event.target.closest(".modal__close")) {
+      event.preventDefault();
+      this.close();
     }
-    document.removeEventListener("keydown", this.esc);
+  }
+
+  onDocumentKeyDown(event) {
+    if (event.code === "Escape") {
+      event.preventDefault();
+      this.close();
+    }
   }
 
   setTitle(title) {
-    if (this.modalElement) {
-      this.modalElement.querySelector(".modal__title").textContent = title;
-    }
+    this.sub("title").textContent = title;
   }
 
   setBody(node) {
-    if (this.modalElement) {
-      const modalBody = this.modalElement.querySelector(".modal__body");
-      modalBody.innerHTML = "";
-      modalBody.append(node);
-    }
+    this.sub("body").innerHTML = "";
+    this.sub("body").append(node);
   }
-  esc(event) {
-    if (event.code == "Escape") {
-      this.close();
-    }
+
+  close() {
+    document.removeEventListener("keydown", this._keydownEventListener);
+    document.body.classList.remove("is-modal-open");
+    this.elem.remove();
   }
 }
