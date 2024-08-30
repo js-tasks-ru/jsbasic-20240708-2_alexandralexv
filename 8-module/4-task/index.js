@@ -13,11 +13,13 @@ export default class Cart {
   }
 
   addProduct(product) {
-    let cartItem = this.cartItems.find((item) => item.product.id == product.id);
+    let cartItem = this.cartItems.find(
+      item => item.product.id == product.id
+    );
     if (!cartItem) {
       cartItem = {
         product,
-        count: 1,
+        count: 1
       };
       this.cartItems.push(cartItem);
     } else {
@@ -123,7 +125,7 @@ export default class Cart {
     this.modal.setBody(this.modalBody);
 
     // when modal is closed, we forget about it, don't update it any more
-    this.modal.elem.addEventListener("modal-close", () => {
+    this.modal.elem.addEventListener('modal-close', () => {
       this.modal = null;
       this.modalBody = null;
     });
@@ -201,7 +203,7 @@ export default class Cart {
         </p>
       </div>
       `;
-  }
+  };
 
   addEventListeners() {
     this.cartIcon.elem.onclick = () => this.renderModal();
