@@ -68,10 +68,59 @@ export default class Main {
     };
   }
 
+  async render() {
+    this.renderCarousel();
+    this.renderRibbon();
+    this.renderStepSlider();
+    this.renderCartIcon()
+
+    this.cart = new Cart(this.cartIcon);
+
+    this.products = await this.fetchProducts();
+
+    this.renderProductsGrid();
+
+    this.productsGrid.updateFilter({
+      noNuts: document.getElementById('nuts-checkbox').checked,
+      vegeterianOnly: document.getElementById('vegeterian-checkbox').checked,
+      maxSpiciness: this.stepSlider.value,
+      category: this.ribbonMenu.value
+    });
+
+    document.body.addEventListener('product-add', ({ detail: productId }) => {
+      let product = this.products.find(product => product.id == productId);
+      this.cart.addProduct(product);
+    });
+
+    this.stepSlider.elem.addEventListener('slider-change', ({ detail: value }) => {
+      this.productsGrid.updateFilter({
+        maxSpiciness: value
+      });
+    });
+
+    this.ribbonMenu.elem.addEventListener('ribbon-select', ({ detail: categoryId }) => {
+      this.productsGrid.updateFilter({
+        category: categoryId
+      });
+    });
+
+    document.getElementById('nuts-checkbox').onchange = event => {
+      this.productsGrid.updateFilter({
+        noNuts: event.target.checked
+      });
+    };
+
+    document.getElementById('vegeterian-checkbox').onchange = event => {
+      this.productsGrid.updateFilter({
+        vegeterianOnly: event.target.checked
+      });
+    };
+  }
+
   renderCarousel() {
     this.carousel = new Carousel(slides);
 
-    document.querySelector("[data-carousel-holder]").append(this.carousel.elem);
+    document.querySelector('[data-carousel-holder]').append(this.carousel.elem);
   }
 
   renderRibbon() {
@@ -83,14 +132,14 @@ export default class Main {
   renderStepSlider() {
     this.stepSlider = new StepSlider({
       steps: 5,
-      value: 3,
+      value: 3
     });
 
-    document.querySelector("[data-slider-holder]").append(this.stepSlider.elem);
+    document.querySelector('[data-slider-holder]').append(this.stepSlider.elem);
   }
 
   renderCartIcon() {
-    let cartIconHolder = document.querySelector("[data-cart-icon-holder]");
+    let cartIconHolder = document.querySelector('[data-cart-icon-holder]');
     this.cartIcon = new CartIcon();
 
     cartIconHolder.append(this.cartIcon.elem);
